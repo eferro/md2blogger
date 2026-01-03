@@ -20,6 +20,10 @@ go.work
 /bin/
 /dist/
 
+# Samples and examples
+/samples/
+example.md
+
 # IDE
 .vscode/
 .idea/
