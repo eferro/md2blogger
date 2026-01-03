@@ -1,29 +1,38 @@
-# AI Agent Development Rules  
+# AI Agent Development Rules - Go Project
 
-This document contains all development rules and guidelines for this project, applicable to all AI agents (Claude, Gemini, etc.).
+This document contains all development rules and guidelines for this Go project, applicable to all AI agents (Claude, Gemini, etc.).
 
 ## 1. Core Principles
 
 - **Baby Steps**: Always work in baby steps, one at a time. Never go forward more than one step.
 - **Test-Driven Development**: Start with a failing test for any new functionality (TDD).
 - **Progressive Revelation**: Never show all the code at once; only the next step.
-- **Type Safety**: All code must be fully typed.
-- **Simplicity First**: Use the simplest working solution; avoid unnecessary abstractions.
-- **Small Components**: Classes and methods should be small (10–20 lines max).
-- **Clear Naming**: Use clear, descriptive names for all variables and functions.
+- **Type Safety**: Leverage Go's static type system fully. Avoid `interface{}` unless absolutely necessary. Use type parameters (generics) when appropriate (Go 1.18+).
+- **Simplicity First**: Follow Go's philosophy: simplicity over cleverness. Use the simplest working solution; avoid unnecessary abstractions and premature optimization.
+- **Small, Focused Functions**: Keep functions focused and readable. Aim for 20-40 lines as a guideline, but prioritize clarity and cohesion. A well-structured 50-line function is better than artificially split code.
+- **Clear Naming**: Use clear, descriptive names following Go conventions (e.g., `mixedCaps` for unexported, `MixedCaps` for exported, short names for short scopes like `i` for index).
 - **Incremental Changes**: Prefer incremental, focused changes over large, complex modifications.
 - **Question Assumptions**: Always question assumptions and inferences.
-- **Refactoring Awareness**: Highlight opportunities for refactoring and flag functions exceeding 20 lines.
-- **Pattern Detection**: Detect and highlight repeated code patterns.
+- **Refactoring Awareness**: Highlight opportunities for refactoring when functions become hard to understand or test.
+- **Pattern Detection**: Detect and highlight repeated code patterns that could benefit from abstraction.
 
-## 2. Code Quality & Coverage
+## 2. Code Quality & Coverage (Go-Specific)
 
-- **MANDATORY Validation**: Before EVERY commit, run the project's validation task and fix ALL errors. Zero tolerance.
+- **MANDATORY Validation**: Before EVERY commit, run `make validate` and fix ALL errors. Zero tolerance.
 - **Quality Requirements**: The project has strict requirements for code quality and maintainability.
-- **High Coverage**: All code must have very high test coverage; strive for 100% where practical.
-- **Pre-commit Checks**: All code must pass the project's quality checks before any commit (typically: typing, formatting, style/linting).
+- **High Coverage**: All code must have very high test coverage; strive for 80%+ where practical, 100% for critical business logic.
+- **Pre-commit Checks**: All code must pass before any commit:
+  - `gofmt` (formatting)
+  - `go vet` (static analysis)
+  - All tests with `-race` flag (race condition detection)
 - **TDD Workflow**: Test-Driven Development (TDD) is the default workflow: always write tests first.
-- **OOP Design**: Use Object-Oriented Programming (OOP) for all components and features.
+- **Idiomatic Go**: Follow Go idioms and best practices:
+  - Prefer composition over inheritance (use embedding and interfaces)
+  - Accept interfaces, return structs
+  - Handle errors explicitly, don't ignore them
+  - Use `defer` for cleanup
+  - Follow "Effective Go" guidelines
+  - Keep the happy path left-aligned (avoid deep nesting)
 
 ## 3. Style Guidelines
 
@@ -101,14 +110,15 @@ This document contains all development rules and guidelines for this project, ap
 - **Single Test**: Write only one test at a time; never create more than one test per change.
 - **Complete Coverage**: Ensure every new feature or bugfix is covered by a test.
 
-### Test Structure & Style
-- **Consistent Tooling**: Use the project's configured test runner, assertion library, and mocking framework consistently.
-- **Type Hints**: All test functions and helpers must have full type hints (if applicable).
-- **Focused Tests**: Keep each test focused and under 20 lines.
-- **Clear Naming**: Use clear, descriptive names for test functions and variables.
+### Test Structure & Style (Go-Specific)
+- **Consistent Tooling**: Use Go's standard `testing` package. Use testify/assert only if the project already has it.
+- **Test File Organization**: Tests go in `*_test.go` files in the same package. Integration tests can use `package_test` to test public API.
+- **Focused Tests**: Keep each test focused and readable. Aim for 20-30 lines, but prioritize clarity over strict line limits.
+- **Clear Naming**: Use Go's test naming convention: `TestFunctionName` for unit tests, `TestFunctionName_WhenCondition` for specific scenarios.
+- **Table-Driven Tests**: Use table-driven tests for testing multiple scenarios of the same behavior.
 - **No Comments**: Avoid comments; make code self-documenting through naming.
-- **Simple Helpers**: Use helper methods (e.g., object mothers/factories) for repeated setup.
-- **Strategic Mocking**: Use standard library mocking for system/platform modules. Use the project's mocking framework for application code.
+- **Helper Functions**: Extract common setup into helper functions. Prefix with `test` for unexported helpers.
+- **Strategic Mocking**: Prefer testing real implementations where practical. Use interfaces for dependencies that need mocking (databases, APIs, file systems). Define interfaces in the consumer package, not the provider.
 
 ### Test Simplicity & Maintainability
 - **Simplest Setup**: Prefer the simplest test setup that covers the requirement.
@@ -139,39 +149,38 @@ This document contains all development rules and guidelines for this project, ap
 ### Core Rule
 **NEVER** call tools like `pytest`, `black`, `mypy`, or similar directly. Always use the project's task runner (e.g., Make, npm scripts, Poetry scripts, Gradle, etc.).
 
-### Discovering Available Tasks
-Before starting work on a project, identify the task runner and available tasks:
-- **Makefile**: Run `make help` or inspect the `Makefile`
-- **npm/yarn**: Check `package.json` scripts section
-- **Poetry**: Check `pyproject.toml` scripts or use `poetry run`
-- **Gradle**: Run `./gradlew tasks`
+### Discovering Available Tasks (Go Projects)
+Before starting work, identify available tasks:
+- **Makefile**: Run `make help` or inspect the `Makefile` (most common for Go projects)
+- Check for `mage` (magefile.go) or `task` (Taskfile.yml) if no Makefile exists
 
-### Common Task Categories
-Projects typically provide tasks for:
-- **Testing**: Unit tests, integration tests, e2e tests
-- **Formatting**: Code formatting and format checking
-- **Linting/Style**: Style checking and static analysis
-- **Type Checking**: Static type analysis
-- **Building**: Build and package the application
-- **Running**: Start the application locally
+### Common Task Categories (Go Projects)
+Go projects typically provide these tasks:
+- **test**: Run all tests with coverage (`go test -v -race -coverprofile=coverage.out ./...`)
+- **build**: Build the binary (`go build -o bin/...`)
+- **install**: Install to GOPATH/bin (`go install`)
+- **fmt**: Format code (`gofmt -s -w .`)
+- **vet**: Static analysis (`go vet ./...`)
+- **validate**: Run all quality checks (fmt, vet, test)
+- **clean**: Remove build artifacts
+- **lint**: Run golangci-lint (if configured)
 
 ### Usage Rules
 1. **Discover first**: Always check what tasks are available before running any tool.
 2. **Use task runner**: Never call underlying tools directly; use the configured task.
 3. **Add new tasks**: If a new operation is needed, prefer adding a new task rather than running a tool directly.
 
-### Good vs Bad Examples
+### Good vs Bad Examples (Go)
 ```sh
 # Good: Use task runner
-make test-unit        # Makefile
-npm run test          # npm scripts
-./gradlew test        # Gradle
-poetry run pytest     # Poetry
+make test             # Run tests via Makefile
+make validate         # Run all quality checks
+make build            # Build the binary
 
 # Bad: Call tools directly
-pytest tests/unit
-black src/
-mypy src/
+go test ./...
+gofmt -w .
+go vet ./...
 ```
 
 ## 11. Pre-Commit Validation (MANDATORY)
@@ -184,19 +193,62 @@ Before ANY commit:
 ❌ **NEVER**: Commit → discover errors → fix commit
 ✅ **ALWAYS**: Validate → fix all errors → commit once
 
-## 12. Quick Reference for All AI Agents
+## 12. Go Project Structure
 
-When working on this project:
+### Standard Layout
+Follow the Go community's standard project layout:
+- **`cmd/`**: Main applications for this project. Directory name should match the binary name.
+  - `cmd/myapp/main.go` → builds `myapp` binary
+- **`pkg/`**: Library code that's ok to import by external applications (optional, use sparingly)
+- **`internal/`**: Private application and library code. Cannot be imported by other projects.
+- **Root directory**: Library packages if this is a library project
+- **`docs/`**: Documentation beyond README
+- **`scripts/`**: Build, install, analysis, etc. scripts (if not using Make)
+
+### Package Organization
+- Keep packages small and focused
+- Avoid circular dependencies
+- Group by domain/functionality, not by layer (avoid packages named `models`, `controllers`, `services`)
+- Example good structure:
+  ```
+  cmd/md2blogger/     # CLI entrypoint
+  converter/          # Markdown conversion logic
+  renderer/           # HTML rendering (if needed)
+  internal/parser/    # Internal parsing utilities
+  ```
+
+### File Organization
+- One concept per file (e.g., `user.go`, `user_test.go`)
+- Keep `main.go` minimal in `cmd/` directories
+- Tests in same package as code (`*_test.go`)
+- Integration tests can use `package_test` suffix
+
+### Dependency Management
+- Use Go modules (`go.mod`, `go.sum`)
+- Run `go mod tidy` regularly to clean up dependencies
+- Vendor dependencies only if necessary (`go mod vendor`)
+
+## 13. Quick Reference for Go Development
+
+When working on this Go project:
 
 1. **Take baby steps** - one test, one file, one change at a time 👣
 2. **Always write the failing test first** (TDD) ❌➡️✅
-3. **Use task runner** - never call tools directly 🔧
-4. **Keep code small and typed** - max 20 lines per method 📏
+3. **Use Makefile** - never call go commands directly (`make test`, not `go test`) 🔧
+4. **Keep functions focused** - aim for 20-40 lines, prioritize clarity 📏
 5. **Show reasoning for complex issues** - be clear and professional 💭
 6. **Question everything** - assumptions, requirements, design choices ❓
-7. **Validate before EVERY commit** - zero tolerance ✅
-8. **Run tests automatically** after every change 🧪
-9. **Focus on simplicity** over cleverness ✨
+7. **Run `make validate` before EVERY commit** - zero tolerance ✅
+8. **Run tests automatically** after every change (`make test`) 🧪
+9. **Follow Go idioms** - simplicity, composition, explicit errors ✨
 10. **Ask for clarification** when in doubt 🤔
 
-Remember: This is a high-quality, test-driven, incremental development environment. Quality over speed, clarity over cleverness, baby steps over big leaps. 
+### Go-Specific Reminders
+- Accept interfaces, return concrete types
+- Handle errors explicitly, never ignore them
+- Use `defer` for cleanup
+- Keep the happy path left-aligned (minimal nesting)
+- Prefer table-driven tests
+- Use `gofmt`, `go vet`, and race detector
+
+Remember: This is a high-quality, test-driven, incremental Go development environment. Simplicity over cleverness, clarity over complexity, idiomatic Go over clever hacks. 
