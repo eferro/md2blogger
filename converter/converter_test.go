@@ -19,3 +19,20 @@ func TestConvertSimpleMarkdownToHTML(t *testing.T) {
 		t.Errorf("expected %q, got %q", expected, result)
 	}
 }
+
+func TestParagraphsHaveBlankLineBetween(t *testing.T) {
+	markdown := `First paragraph.
+
+Second paragraph.`
+
+	result, err := Convert(markdown)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := "<p>First paragraph.</p>\n\n<p>Second paragraph.</p>\n\n"
+	if result != expected {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
+}

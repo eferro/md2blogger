@@ -2,6 +2,7 @@ package converter
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -28,5 +29,24 @@ func Convert(markdown string) (string, error) {
 		return "", err
 	}
 
-	return buf.String(), nil
+	return addBlankLinesBetweenBlocks(buf.String()), nil
+}
+
+func addBlankLinesBetweenBlocks(html string) string {
+	blockElements := []string{
+		"</p>",
+		"</h1>", "</h2>", "</h3>", "</h4>", "</h5>", "</h6>",
+		"</ul>", "</ol>",
+		"</pre>",
+		"</blockquote>",
+		"</table>",
+		"</div>",
+	}
+
+	result := html
+	for _, element := range blockElements {
+		result = strings.ReplaceAll(result, element+"\n", element+"\n\n")
+	}
+
+	return result
 }
