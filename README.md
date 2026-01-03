@@ -30,7 +30,14 @@ cd md2blogger
 make install
 ```
 
-This installs the binary to `$GOPATH/bin/md2blogger`.
+This installs the binary to `~/.local/bin/md2blogger` by default.
+
+**Custom installation directory**:
+```bash
+make install INSTALL_DIR=/usr/local/bin
+```
+
+Make sure the installation directory is in your `PATH`.
 
 ### Download Binary
 
