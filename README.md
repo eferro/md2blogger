@@ -95,12 +95,16 @@ Running `md2blogger example.md` produces:
 
 ```html
 <h1 id="my-blog-post">My Blog Post</h1>
+
 <p>This is <strong>bold</strong> and this is <em>italic</em>.</p>
+
 <h2 id="code-example">Code Example</h2>
+
 <pre><code class="language-go">func main() {
     fmt.Println("Hello!")
 }
 </code></pre>
+
 <table>
 <thead>
 <tr>
@@ -115,6 +119,7 @@ Running `md2blogger example.md` produces:
 </tr>
 </tbody>
 </table>
+
 ```
 
 ## Development
