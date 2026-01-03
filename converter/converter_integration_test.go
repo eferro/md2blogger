@@ -26,7 +26,7 @@ Paragraph with **bold** and *italic*.
 [Link](https://example.com)
 `
 
-	result, err := Convert(markdown)
+	result, err := Convert(markdown, false)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

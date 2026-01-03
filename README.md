@@ -45,7 +45,7 @@ Download pre-built binaries from the [releases page](https://github.com/eduardof
 
 ## Usage
 
-### Read from file
+### Basic Usage
 
 ```bash
 md2blogger mypost.md > output.html
@@ -55,6 +55,14 @@ md2blogger mypost.md > output.html
 
 ```bash
 cat mypost.md | md2blogger > output.html
+```
+
+### Enable heading IDs
+
+By default, headings do not include IDs. To add IDs to headings (e.g., `<h1 id="my-heading">`), use the `-ids` flag:
+
+```bash
+md2blogger -ids mypost.md > output.html
 ```
 
 ### Pipe directly to clipboard (macOS)
@@ -94,11 +102,11 @@ func main() {
 Running `md2blogger example.md` produces:
 
 ```html
-<h1 id="my-blog-post">My Blog Post</h1>
+<h1>My Blog Post</h1>
 
 <p>This is <strong>bold</strong> and this is <em>italic</em>.</p>
 
-<h2 id="code-example">Code Example</h2>
+<h2>Code Example</h2>
 
 <pre><code class="language-go">func main() {
     fmt.Println("Hello!")
@@ -120,6 +128,15 @@ Running `md2blogger example.md` produces:
 </tbody>
 </table>
 
+```
+
+With the `-ids` flag (`md2blogger -ids example.md`), headings include IDs:
+
+```html
+<h1 id="my-blog-post">My Blog Post</h1>
+
+<h2 id="code-example">Code Example</h2>
+...
 ```
 
 ## Development

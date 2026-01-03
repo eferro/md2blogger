@@ -10,15 +10,18 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-func Convert(markdown string) (string, error) {
+func Convert(markdown string, enableIDs bool) (string, error) {
+	parserOptions := []parser.Option{}
+	if enableIDs {
+		parserOptions = append(parserOptions, parser.WithAutoHeadingID())
+	}
+
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
 			extension.Table,
 		),
-		goldmark.WithParserOptions(
-			parser.WithAutoHeadingID(),
-		),
+		goldmark.WithParserOptions(parserOptions...),
 		goldmark.WithRendererOptions(
 			html.WithUnsafe(),
 		),

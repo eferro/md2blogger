@@ -12,7 +12,7 @@ func TestReadFromStdin(t *testing.T) {
 	stdin := bytes.NewBufferString(markdown)
 	var stdout bytes.Buffer
 
-	err := processMarkdown(stdin, &stdout, "")
+	err := processMarkdown(stdin, &stdout, "", false)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -38,7 +38,7 @@ func TestReadFromFile(t *testing.T) {
 	tmpfile.Close()
 
 	var stdout bytes.Buffer
-	err = processMarkdown(nil, &stdout, tmpfile.Name())
+	err = processMarkdown(nil, &stdout, tmpfile.Name(), false)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -50,21 +50,36 @@ func TestReadFromFile(t *testing.T) {
 	}
 }
 
-func TestHelpFlag(t *testing.T) {
-	testCases := []string{"-h", "--help"}
+func TestWithIDsFlag(t *testing.T) {
+	markdown := "# Test Header"
+	stdin := bytes.NewBufferString(markdown)
+	var stdout bytes.Buffer
 
-	for _, flag := range testCases {
-		t.Run(flag, func(t *testing.T) {
-			var stdout bytes.Buffer
-			err := processMarkdown(nil, &stdout, flag)
+	err := processMarkdown(stdin, &stdout, "", true)
 
-			if err == nil {
-				t.Error("expected help flag to return early without error")
-			}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-			if err.Error() != "help requested" {
-				t.Errorf("expected 'help requested' error, got: %v", err)
-			}
-		})
+	output := stdout.String()
+	if !strings.Contains(output, `id="test-header"`) {
+		t.Errorf("expected header with ID in output, got: %q", output)
+	}
+}
+
+func TestWithoutIDsFlag(t *testing.T) {
+	markdown := "# Test Header"
+	stdin := bytes.NewBufferString(markdown)
+	var stdout bytes.Buffer
+
+	err := processMarkdown(stdin, &stdout, "", false)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	output := stdout.String()
+	if strings.Contains(output, `id="`) {
+		t.Errorf("expected header without ID in output, got: %q", output)
 	}
 }
